@@ -1,25 +1,25 @@
-health=2
-magazin=8
-bullets=4
+health=5
+magazin=6
+bullets=2
 damage=1
 
-lenscounter=0
+lenscounter=1
 lenscounter1=$lenscounter
 lenscounter2=$lenscounter
 
-handcuffscounter=0
+handcuffscounter=1
 handcuffscounter1=$handcuffscounter
 handcuffscounter2=$handcuffscounter
 
-beercounter=0
+beercounter=1
 beercounter1=$beercounter
 beercounter2=$beercounter
 
-cigarettecounter=0
+cigarettecounter=1
 cigarettecounter1=$cigarettecounter
 cigarettecounter2=$cigarettecounter
 
-sawcounter=0
+sawcounter=1
 sawcounter1=$sawcounter
 sawcounter2=$sawcounter
 
@@ -386,22 +386,21 @@ clear
 for ((i = 0; i < $magazin; i++))
 do
 	changerid1=$[$RANDOM%$magazin]
-	changerid2=$[$magazin-$i]
+	changerid2=$i
 	changer=${gun[changerid1]}
 	gun[changerid1]=${gun[changerid2]}
 	gun[changerid2]=$changer
 done
 
-
-
 counter=0
 current=$player1
 next=$player2
+magazinlen=$magazin
 last="empty"
 gameover="False"
 handcuffsstatus="Unlocked"
 handcuffsstatuslast="Unlocked"
-while [ $counter == 6 ] || [ $gameover != "True" ]
+while [ $counter != $magazinlen ] && [ $gameover == "False" ]
 do
 	if [ $current != '\033[31mdealer\033[0m' ] && [ $current != '\033[32mdealer\033[0m' ]
 	then
@@ -411,6 +410,6 @@ do
 	fi
 	targetchoose
 	magazin=$[$magazin-1]
-	counter=$(($counter+1))
+	counter=$[$counter+1]
 	damage=1
 done
