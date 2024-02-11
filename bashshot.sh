@@ -1,30 +1,79 @@
-health=5
-magazin=6
-bullets=2
+health=2
+magazin=3
+bullets=1
 damage=1
+fin=3
 
-lenscounter=1
+lenscounter=0
 lenscounter1=$lenscounter
 lenscounter2=$lenscounter
 
-handcuffscounter=1
+handcuffscounter=0
 handcuffscounter1=$handcuffscounter
 handcuffscounter2=$handcuffscounter
 
-beercounter=1
+beercounter=0
 beercounter1=$beercounter
 beercounter2=$beercounter
 
-cigarettecounter=1
+cigarettecounter=0
 cigarettecounter1=$cigarettecounter
 cigarettecounter2=$cigarettecounter
 
-sawcounter=1
+sawcounter=0
 sawcounter1=$sawcounter
 sawcounter2=$sawcounter
 
 healthbar1=$health
 healthbar2=$health
+
+bonusgenerator() {
+	
+	lenscounter=0
+	handcuffscounter=0
+	beercounter=0
+	cigarettecounter=0
+	sawcounter=0
+	
+	for ((i = 0; i < $[$level*2-bonussumcounter]; i++))
+	do
+		local bonuschooser=$[$RANDOM%5]
+		if [ $bonuschooser == 0 ]
+		then
+			lenscounter=$[$lenscounter+1]
+		elif [ $bonuschooser == 1 ]
+		then
+			handcuffscounter=$[$handcuffscounter+1]
+		elif [ $bonuschooser == 2 ]
+		then
+			beercounter=$[$beercounter+1]
+		elif [ $bonuschooser == 3 ]
+		then
+			cigarettecounter=$[$cigarettecounter+1]
+		elif [ $bonuschooser == 4 ]
+		then
+			sawcounter=$[$sawcounter+1]
+		fi
+	done
+}
+
+bonusgiver() {
+	bonussumcounter=$[$lenscounter1+$handcuffscounter1+$beercounter1+$cigarettecounter1+$sawcounter1]
+	bonusgenerator
+	lenscounter1=$[$lenscounter1+$lenscounter]
+	handcuffscounter1=$[$handcuffscounter1+$handcuffscounter]
+	beercounter1=$[beercounter1+$beercounter]
+	cigarettecounter1=$[$cigarettecounter1+$cigarettecounter]
+	sawcounter1=$[$sawcounter1+$sawcounter]
+	
+	bonussumcounter=$[$lenscounter2+$handcuffscounter2+$beercounter2+$cigarettecounter2+$sawcounter2]
+	bonusgenerator
+	lenscounter2=$[$lenscounter2+$lenscounter]
+	handcuffscounter2=$[$handcuffscounter2+$handcuffscounter]
+	beercounter2=$[beercounter2+$beercounter]
+	cigarettecounter2=$[$cigarettecounter2+$cigarettecounter]
+	sawcounter2=$[$sawcounter2+$sawcounter]
+}
 
 bonusinfo() {
 clear
@@ -263,6 +312,7 @@ health() {
 	then
 		gameover="True"
 		echo -e "Выиграл, "$winner"!"
+		sleep 3
 	fi
 }
 
@@ -356,7 +406,7 @@ targetchoose() {
 }
 
 statusbar() {	
-	echo -e $player1"'s health: " $healthbar1" | "$player2"'s health: " $healthbar2
+	echo -e $player1"'s health: " $healthbar1" | "$player2"'s health: " $healthbar2" | level: "$[$level+1]
 }
 
 clear
@@ -370,37 +420,54 @@ player2="\033[32m"$player2"\033[0m"
 clear
 
 
+magazingenerator() {
+	for ((i = 0; i < $bullets; i++))
+	do
+		gun[i]=1
+	done
+	for ((i = $bullets; i < $magazin; i++))
+	do
+		gun[i]=0
+	done
+	statusbar
+	echo ${gun[*]}
+	sleep 3s
+	clear
+	for ((i = 0; i < $magazin; i++))
+	do
+		changerid1=$[$RANDOM%$magazin]
+		changerid2=$i
+		changer=${gun[changerid1]}
+		gun[changerid1]=${gun[changerid2]}
+		gun[changerid2]=$changer
+	done
+}
 
-for ((i = 0; i < $bullets; i++))
-do
-	gun[i]=1
-done
-for ((i = $bullets; i < $magazin; i++))
-do
-	gun[i]=0
-done
-statusbar
-echo ${gun[*]}
-sleep 3s
-clear
-for ((i = 0; i < $magazin; i++))
-do
-	changerid1=$[$RANDOM%$magazin]
-	changerid2=$i
-	changer=${gun[changerid1]}
-	gun[changerid1]=${gun[changerid2]}
-	gun[changerid2]=$changer
-done
+magazinregen() {
+		clear
+		counter=0
+		magazinlen=$[$magazinlen+$level]
+		bulletsnum=$[$bulletsnum+$level]
+		magazin=$magazinlen
+		bullets=$bulletsnum
+		magazingenerator
+		bonusgiver
+}
 
 counter=0
+level=0
 current=$player1
 next=$player2
 magazinlen=$magazin
+bulletsnum=$bullets
 last="empty"
 gameover="False"
 handcuffsstatus="Unlocked"
 handcuffsstatuslast="Unlocked"
-while [ $counter != $magazinlen ] && [ $gameover == "False" ]
+
+magazingenerator
+
+while [ $level != $fin ]
 do
 	if [ $current != '\033[31mdealer\033[0m' ] && [ $current != '\033[32mdealer\033[0m' ]
 	then
@@ -412,4 +479,24 @@ do
 	magazin=$[$magazin-1]
 	counter=$[$counter+1]
 	damage=1
+	if [ $counter == $magazinlen ]
+	then
+		magazinregen
+	fi
+	if [ $gameover != "False" ]
+	then
+		level=$[$level+1]
+		if [ $level != $fin ]
+		then
+			clear
+			echo "level up"
+			sleep 3
+			clear
+			gameover="False"
+			health=$[$health+$level]
+			healthbar1=$health
+			healthbar2=$health
+			magazinregen
+		fi
+	fi
 done
