@@ -242,13 +242,15 @@ beer() {
 	sleep 2s
 	clear
 	statusbar
-	if [ $[gun[counter]] == 1 ]
+	if [ $[gun[$counter]] == 1 ]
 	then
 		echo -e "\033[31mбах\033[0m"
+		bullets=$[$bullets-1]
 	else
 		echo -e "\033[32mщёлк\033[0m"
 	fi
-	counter=$[counter+1]
+	counter=$[$counter+1]
+	magazin=$[$magazin-1]
 	sleep 2s
 	clear
 	damage=1
@@ -264,7 +266,10 @@ cigarette() {
 	cigarettecounter[i]=$[${cigarettecounter[i]}-1]
 	if [ ${healthbar[i]} -gt 1 ] || [ 7 -gt ${healthbar[i]} ]
 	then
-		healthbar[i]=$[${healthbar[i]}+1]
+		if [ ${healthbar[i]} != 1 ] && [ $level != 2 ]
+		then
+			healthbar[i]=$[${healthbar[i]}+1]
+		fi
 	fi
 	clear
 	statusbar
@@ -477,8 +482,21 @@ targetchoose() {
 	fi
 }
 
-statusbar() {	
-	echo -e $player1"'s health: " ${healthbar[1]}" | "$player2"'s health: " ${healthbar[2]}" | level: "$[$level+1]
+statusbar() {
+	local health1=${healthbar[1]}
+	local health2=${healthbar[2]}
+	if [ $level == 2 ]
+	then
+		if [ ${healthbar[1]} == 1 ]
+		then
+			local health1="\033[31mx\033[0m"
+		fi
+		if [ ${healthbar[2]} == 1 ]
+		then
+			local health2="\033[31mx\033[0m"
+		fi
+	fi
+	echo -e $player1"'s health: " $health1" | "$player2"'s health: " $health2" | level: "$[$level+1]
 }
 
 clear
