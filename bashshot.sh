@@ -264,9 +264,15 @@ cigarette() {
 		local i=2
 	fi
 	cigarettecounter[i]=$[${cigarettecounter[i]}-1]
-	if [ ${healthbar[i]} -gt 1 ] || [ 7 -gt ${healthbar[i]} ]
+	if [ ${healthbar[i]} == 1 ] && [ $level == 2 ]
 	then
-		if [ ${healthbar[i]} != 1 ] && [ $level != 2 ]
+		clear
+		statusbar
+		echo "здоровье не восполенено"
+		sleep 2
+		clear
+	else
+		if [ 7 -gt ${healthbar[i]} ]
 		then
 			healthbar[i]=$[${healthbar[i]}+1]
 		fi
@@ -567,7 +573,7 @@ do
 	magazin=$[$magazin-1]
 	counter=$[$counter+1]
 	damage=1
-	if [ $counter == $magazinlen ] && [ $gameover == "False" ]
+	if [ $counter -gt $[$magazinlen-1] ] && [ $gameover == "False" ]
 	then
 		magazinregen
 	fi
