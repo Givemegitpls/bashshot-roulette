@@ -30,7 +30,7 @@ healthbar[2]=$health
 bonusgenerator() {
 	
 	lensnum=0
-	handcuffsnum=0
+	handcuffsnum=4
 	beernum=0
 	cigarettenum=0
 	sawnum=0
@@ -251,6 +251,10 @@ beer() {
 	fi
 	counter=$[$counter+1]
 	magazin=$[$magazin-1]
+	if [ $counter -gt $[$magazinlen-1] ]
+	then
+		magazinregen
+	fi
 	sleep 2s
 	clear
 	damage=1
@@ -379,7 +383,7 @@ dealerbonus() {
 		do
 			cigarette
 		done
-		if [ ${handcuffscounter[i]} != 0 ] && [ $handcuffsstatuslast == 'Unocked' ] && [ $handcuffsstatus == 'Unlocked' ]
+		if [ ${handcuffscounter[i]} != 0 ] && [ $handcuffsstatuslast == 'Unlocked' ] && [ $handcuffsstatus == 'Unlocked' ]
 		then
 			local rand=$[$RANDOM%2]
 			if [ $rand == 1 ]
@@ -506,11 +510,11 @@ statusbar() {
 }
 
 clear
-echo "Первый участник, введите имя"
+echo "Первый участник, представьтесь"
 read player1
 player1="\033[31m"$player1"\033[0m"
 clear
-echo "Второй участник, введите имя"
+echo "Второй участник, представьтесь"
 read player2
 player2="\033[32m"$player2"\033[0m"
 clear
