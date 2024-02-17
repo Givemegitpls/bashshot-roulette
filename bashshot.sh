@@ -30,7 +30,7 @@ healthbar[2]=$health
 bonusgenerator() {
 	
 	lensnum=0
-	handcuffsnum=4
+	handcuffsnum=0
 	beernum=0
 	cigarettenum=0
 	sawnum=0
@@ -38,22 +38,23 @@ bonusgenerator() {
 	for ((a = 0; a < $[$level*2-bonussumcounter]; a++))
 	do
 		local bonuschooser=$[$RANDOM%5]
-		if [ $bonuschooser == 0 ]
-		then
-			lensnum=$[$lensnum+1]
-		elif [ $bonuschooser == 1 ]
-		then
-			handcuffsnum=$[$handcuffsnum+1]
-		elif [ $bonuschooser == 2 ]
-		then
-			beernum=$[$beernum+1]
-		elif [ $bonuschooser == 3 ]
-		then
-			cigarettenum=$[$cigarettenum+1]
-		elif [ $bonuschooser == 4 ]
-		then
-			sawnum=$[$sawnum+1]
-		fi
+		case $bonuschooser in
+			0)
+				lensnum=$[$lensnum+1]
+			;;
+			1)
+				handcuffsnum=$[$handcuffsnum+1]
+			;;
+			2)
+				beernum=$[$beernum+1]
+			;;
+			3)
+				cigarettenum=$[$cigarettenum+1]
+			;;
+			4)
+				sawnum=$[$sawnum+1]
+			;;
+		esac
 	done
 }
 
@@ -78,7 +79,7 @@ clear
 
 	echo -e "Банка пива — позволяет выстрелить в воздух\n"
 
-	echo -e "Ножовка — отрезает часть дула, позволяя нанести двойной урон\n"
+	echo -e "Ножовка — отрезает часть дула, позволя нанести двойной урон\n"
 
 	echo -e "Наручники — противник пропускает ход\n"
 	read 
@@ -87,7 +88,7 @@ clear
 bonuserror() {
 	clear
 	statusbar
-	echo -e $current
+	echo -e ${player[current]}
 	echo "у вас нет этого"
 	sleep 2s
 	clear
@@ -99,17 +100,11 @@ bonuses() {
 	local beernum=0
 	local cigarettenum=0
 	local sawnum=0
-	if [ $current == $player1 ]
-	then
-		local i=1
-	else
-		local i=2
-	fi
-	handcuffsnum=${handcuffscounter[i]}
-	lensnum=${lenscounter[i]}
-	beernum=${beercounter[i]}
-	cigarettenum=${cigarettecounter[i]}
-	sawnum=${sawcounter[i]}
+	handcuffsnum=${handcuffscounter[current]}
+	lensnum=${lenscounter[current]}
+	beernum=${beercounter[current]}
+	cigarettenum=${cigarettecounter[current]}
+	sawnum=${sawcounter[current]}
 	clear
 	statusbar
 	echo -e $current", выбери бонус:"
@@ -122,63 +117,61 @@ bonuses() {
 	echo "7) справка"
 	local choose=0
 	read choose
-	if [ $choose == 1 ]
-	then
-		if [ $lensnum -gt 0 ]
-		then
-			lens
-		else
-			bonuserror
-		fi
-	elif [ $choose == 2 ]
-	then
-		if [ $handcuffsnum -gt 0 ]
-		then
-			handcuffs
-		else
-			bonuserror
-		fi
-	elif [ $choose == 3 ]
-	then
-		if [ $beernum -gt 0 ]
-		then
-			beer
-		else
-			bonuserror
-		fi
-	elif [ $choose == 4 ]
-	then
-		if [ $cigarettenum -gt 0 ]
-		then
-			cigarette
-		else
-			bonuserror
-		fi
-	elif [ $choose == 5 ]
-	then
-		if [ $sawnum -gt 0 ]
-		then
-			saw
-		else
-			bonuserror
-		fi
-	elif [ $choose == 6 ]
-	then
-		clear
-	elif [ $choose == 7 ]
-	then
-		bonusinfo
-		bonuses
-	else
-		clear
-		bonuses
-	fi
+	case $choose in
+		1)
+			if [ $lensnum -gt 0 ]
+			then
+				lens
+			else
+				bonuserror
+			fi
+		;;
+		2)
+			if [ $handcuffsnum -gt 0 ]
+			then
+				handcuffs
+			else
+				bonuserror
+			fi
+		;;
+		3)
+			if [ $beernum -gt 0 ]
+			then
+				beer
+			else
+				bonuserror
+			fi
+		;;
+		4)
+			if [ $cigarettenum -gt 0 ]
+			then
+				cigarette
+			else
+				bonuserror
+			fi
+		;;
+		5)
+			if [ $sawnum -gt 0 ]
+			then
+				saw
+			else
+				bonuserror
+			fi
+		;;
+		7)
+			bonusinfo
+			bonuses
+		;;
+		*)
+			clear
+		;;
+	esac
 }
 
 lens() {
 	clear
 	statusbar
-	echo -e $current
+	echo -e ${player[current]}
 	if [ $[gun[counter]] == 1 ]
 	then 
 		echo -e "\033[31mбоевой\033[0m"
@@ -189,14 +182,7 @@ lens() {
 	fi
 	sleep 2s
 	clear
-	if [ $current == $player2 ]
-	then
-		local i=2
-		lenscounter[i]=$[${lenscounter[i]}-1]
-	else
-		local i=1
-		lenscounter[i]=$[${lenscounter[i]}-1]
-	fi
+	lenscounter[current]=$[${lenscounter[current]}-1]
 }
 
 handcuffs() {
@@ -209,36 +195,24 @@ handcuffs() {
 		clear
 	else
 		handcuffsstatus='Locked'
-		if [ $current == $player1 ]
-		then
-			local i=1
-		else
-			local i=2
-		fi
-		handcuffscounter[i]=$[${handcuffscounter[i]}-1]
+		handcuffscounter[current]=$[${handcuffscounter[current]}-1]
 		clear
 		statusbar
-		echo -e $current "заковал" $next "в наручники"
+		echo -e ${player[current]} "заковал" ${player[next]} "в наручники"
 		sleep 2s
 		clear
 	fi
 }
 
 beer() {
-	if [ $current == $player1 ]
-	then
-		local i=1
-	else
-		local i=2
-	fi
-	beercounter[i]=$[${beercounter[i]}-1]
+	beercounter[current]=$[${beercounter[current]}-1]
 	clear
 	statusbar
-	echo -e $current "выпил пиво"
+	echo -e ${player[current]} "выпил пиво"
 	sleep 2s
 	clear
 	statusbar
-	echo -e $current "стреляет"
+	echo -e ${player[current]} "стреляет"
 	sleep 2s
 	clear
 	statusbar
@@ -261,14 +235,14 @@ beer() {
 }
 
 cigarette() {
-	if [ $current == $player1 ]
-	then
-		local i=1
-	else
-		local i=2
-	fi
-	cigarettecounter[i]=$[${cigarettecounter[i]}-1]
-	if [ ${healthbar[i]} == 1 ] && [ $level == 2 ]
+	cigarettecounter[current]=$[${cigarettecounter[current]}-1]
+	
+	clear
+	statusbar
+	echo -e ${player[current]} "покурил"
+	sleep 2s
+	clear
+	if [ ${healthbar[current]} == 1 ] && [ $level == 2 ]
 	then
 		clear
 		statusbar
@@ -276,29 +250,18 @@ cigarette() {
 		sleep 2
 		clear
 	else
-		if [ 7 -gt ${healthbar[i]} ]
+		if [ 7 -gt ${healthbar[current]} ]
 		then
-			healthbar[i]=$[${healthbar[i]}+1]
+			healthbar[current]=$[${healthbar[current]}+1]
 		fi
 	fi
-	clear
-	statusbar
-	echo -e $current "покурил"
-	sleep 2s
-	clear
 }
 
 saw() {
-	if [ $current == $player1 ]
-	then
-		local i=1
-	else
-		local i=2
-	fi
-	sawcounter[i]=$[${sawcounter[i]}-1]
+	sawcounter[current]=$[${sawcounter[current]}-1]
 	clear
 	statusbar
-	echo -e $current "сделал обрез"
+	echo -e ${player[current]} "сделал обрез"
 	sleep 2s
 	clear
 	damage=2
@@ -309,13 +272,13 @@ shot() {
 	statusbar
 	if [ $target == 1 ]
 	then
-		echo -e $current "стреляет в себя"
+		echo -e ${player[current]} "стреляет в себя"
 		if [ $[gun[counter]] == 1 ]
 		then
 			playerchanger
 		fi
 	else
-		echo -e $current "стреляет в" $next
+		echo -e ${player[$current]} "стреляет в" ${player[$next]}
 	fi
 	echo -e $shotresult
 	sleep 1s
@@ -323,17 +286,16 @@ shot() {
 }
 
 health() {
-	if [ $winner == $player1 ]
+	if [ $winner == $current ]
 	then
-		local i=2
+		healthbar[next]=$[${healthbar[next]}-$damage]
 	else
-		local i=1
+		healthbar[current]=$[${healthbar[current]}-$damage]
 	fi
-	healthbar[i]=$[${healthbar[i]}-$damage]
 	if [ 1 -gt ${healthbar[1]}  ] || [ 1 -gt ${healthbar[2]} ]
 	then
 		gameover="True"
-		echo -e "Выиграл "$winner"!"
+		echo -e "Выиграл "${player[winner]}"!"
 		sleep 3
 	fi
 }
@@ -369,21 +331,15 @@ playerchanger() {
 dealerbonus() {
 	if [ $moodchanger != 2 ]
 	then
-		if [ $current == $player1 ]
-		then
-			local i=1
-		else
-			local i=2
-		fi
-		if [ ${lenscounter[i]} != 0 ] && [ $moodchanger == 1 ]
+		if [ ${lenscounter[current]} != 0 ] && [ $moodchanger == 1 ]
 		then
 			lens
 		fi
-		while [ ${cigarettecounter[i]} != 0 ]
+		while [ ${cigarettecounter[current]} != 0 ]
 		do
 			cigarette
 		done
-		if [ ${handcuffscounter[i]} != 0 ] && [ $handcuffsstatuslast == 'Unlocked' ] && [ $handcuffsstatus == 'Unlocked' ]
+		if [ ${handcuffscounter[current]} != 0 ] && [ $handcuffsstatuslast == 'Unlocked' ] && [ $handcuffsstatus == 'Unlocked' ]
 		then
 			local rand=$[$RANDOM%2]
 			if [ $rand == 1 ]
@@ -392,11 +348,11 @@ dealerbonus() {
 				moodchanger=1
 			fi
 		fi
-		if [ ${sawcounter[i]} != 0 ] && [ $moodchanger == 1 ] && [ ${healthbar[i]} -gt 1 ]
+		if [ ${sawcounter[current]} != 0 ] && [ $moodchanger == 1 ] && [ ${healthbar[current]} -gt 1 ]
 		then
 			saw
 		fi
-		if [ ${beercounter[i]} != 0 ]
+		if [ ${beercounter[current]} != 0 ]
 		then
 			local rand=$[$RANDOM%2]
 			if [ $rand == 1 ] && [ $moodchanger == 1 ]
@@ -409,19 +365,11 @@ dealerbonus() {
 
 dealer() {
 	moodchanger=0
-	local replic=$[$RANDOM%3+1]
+	local replic=$[$RANDOM%3]
 	statusbar
-	echo -e $current:
-	if [ $replic == 1 ]
-	then
-		echo "хм"
-	elif [ $replic == 2 ]
-	then
-		echo "интересно!"
-	elif [ $replic == 3 ]
-	then
-		echo "..."
-	fi
+	local replics=("хм" "интересно!" "...")
+	echo -e ${player[$current]}:
+	echo ${replics[replic]}
 	sleep 1
 	local chance=$[100*$bullets/$magazin]
 	if [ $chance == 0 ]
@@ -442,33 +390,34 @@ dealer() {
 		target=2
 		clear
 		statusbar
-		echo -e $current:
+		echo -e ${player[current]}:
 		echo "Ты готов умереть?"
 		sleep 1.5
 	else
 		target=1
 		clear
 		statusbar
-		echo -e $current:
+		echo -e ${player[current]}:
 		echo "Попытаем удачу?"
 		sleep 1.5
 	fi
+	targetchoose
 }
 
 targetchoosedialog() {
 	statusbar
-	echo -e $current", выбери цель:"
+	echo -e ${player[current]}", выбери цель:"
 	echo "1) выстрелить в себя"
 	echo "2) выстрелить в оппонента"
 	echo "3) посмотреть бонусы"
 	read target
-	if [ $target == 1 ] || [ $target == 2 ] || [ $target == 3 ]
+	if [ $target == 1 ] || [ $target == 2 ]
 	then
-		if [ $target == 3 ]
-		then
-			bonuses
-			targetchoosedialog
-		fi
+		targetchoose
+	elif [ $target == 3 ]
+	then
+		bonuses
+		targetchoosedialog
 	else
 		clear
 		targetchoosedialog
@@ -506,17 +455,18 @@ statusbar() {
 			local health2="\033[31mx\033[0m"
 		fi
 	fi
-	echo -e $player1"'s health: " $health1" | "$player2"'s health: " $health2" | level: "$[$level+1]
+	echo -e ${player[1]}"'s health: " $health1" | "${player[2]}"'s health: " $health2" | level: "$[$level+1]
+	echo -e "bullets: "$[$bullets]" | magazin: "$[$magazin]" | mood: "$[$moodchanger]
 }
 
 clear
 echo "Первый участник, представьтесь"
-read player1
-player1="\033[31m"$player1"\033[0m"
+read player[1]
+player[1]="\033[31m"${player[1]}"\033[0m"
 clear
 echo "Второй участник, представьтесь"
-read player2
-player2="\033[32m"$player2"\033[0m"
+read player[2]
+player[2]="\033[32m"${player[2]}"\033[0m"
 clear
 
 
@@ -556,8 +506,8 @@ magazinregen() {
 
 counter=0
 level=0
-current=$player1
-next=$player2
+current=1
+next=2
 last="empty"
 gameover="False"
 handcuffsstatus="Unlocked"
@@ -567,13 +517,12 @@ magazinregen
 
 while [ $level != $fin ]
 do
-	if [ $current != '\033[31mdealer\033[0m' ] && [ $current != '\033[32mdealer\033[0m' ]
+	if [ ${player[$current]} != '\033[31mdealer\033[0m' ] && [ ${player[$current]} != '\033[32mdealer\033[0m' ]
 	then
 		targetchoosedialog
 	else
 		dealer
 	fi
-	targetchoose
 	magazin=$[$magazin-1]
 	counter=$[$counter+1]
 	damage=1
