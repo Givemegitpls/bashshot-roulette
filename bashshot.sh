@@ -456,7 +456,7 @@ statusbar() {
 		fi
 	fi
 	echo -e ${player[1]}"'s health: " $health1" | "${player[2]}"'s health: " $health2" | level: "$[$level+1]
-	echo -e "bullets: "$[$bullets]" | magazin: "$[$magazin]" | mood: "$[$moodchanger]
+#	echo -e "bullets: "$[$bullets]" | magazin: "$[$magazin]" | mood: "$[$moodchanger]
 }
 
 clear
