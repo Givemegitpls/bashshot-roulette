@@ -469,30 +469,6 @@ read player[2]
 player[2]="\033[32m"${player[2]}"\033[0m"
 clear
 
-
-magazingenerator() {
-	for ((i = 0; i < $bullets; i++))
-	do
-		gun[i]=1
-	done
-	for ((i = $bullets; i < $magazin; i++))
-	do
-		gun[i]=0
-	done
-	statusbar
-	echo ${gun[*]}
-	sleep 3s
-	clear
-	for ((i = 0; i < $magazin; i++))
-	do
-		changerid1=$[$RANDOM%$magazin]
-		changerid2=$i
-		changer=${gun[changerid1]}
-		gun[changerid1]=${gun[changerid2]}
-		gun[changerid2]=$changer
-	done
-}
-
 magazinregen() {
 		clear
 		counter=0
@@ -500,7 +476,26 @@ magazinregen() {
 		bulletsnum=$[1+$[$[$level]*3]]
 		magazin=$magazinlen
 		bullets=$bulletsnum
-		magazingenerator
+		for ((i = 0; i < $bullets; i++))
+		do
+			gun[i]=1
+		done
+		for ((i = $bullets; i < $magazin; i++))
+		do
+			gun[i]=0
+		done
+		statusbar
+		echo ${gun[*]}
+		sleep 3s
+		clear
+		for ((i = 0; i < $magazin; i++))
+		do
+			changerid1=$[$RANDOM%$magazin]
+			changerid2=$i
+			changer=${gun[changerid1]}
+			gun[changerid1]=${gun[changerid2]}
+			gun[changerid2]=$changer
+		done
 		bonusgiver
 }
 
